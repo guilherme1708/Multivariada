@@ -1,0 +1,532 @@
+---
+title: "Lista 1 - MAE0330"
+author: 'Guilherme NºUSP: 8943160 e Leonardo NºUSP: 9793436'
+output:
+  pdf_document:
+    fig_crop: no
+    keep_tex: yes
+    latex_engine: xelatex
+header-includes:
+- \usepackage{multirow}
+- \usepackage{ragged2e}
+- \usepackage{booktabs}
+---
+
+# Exercício 1
+
+Em um estudo 24 tanques de água foram aleatoriamente distribuídos a 4 grupos (cada grupo
+recebeu 6 tanques). Os tanques de cada grupo foram tratados com os reagentes T1, T2, T3 e
+T4, respectivamente. Os dados a seguir referem-se a medidas de clorofila ($Y_1$) e oxigênio dissolvido na água ($Y_2$), mensuradas na superfície dos 24 tanques experimentais. Construa a tabela
+de MANOVA para estudar o efeito do tratamento para o conjunto das variáveis observadas.
+
+Comente os resultados.
+
+\center
+\begin{tabular}{cc|cc|cc|cc}
+\hline
+\multicolumn{2}{c|}{$T_1$} & \multicolumn{2}{c|}{$T_2$} & \multicolumn{2}{c|}{$T_3$} & \multicolumn{2}{c}{$T_4$} \\
+$Y_1$ & $Y_2$ & $Y_1$ & $Y_2$ & $Y_1$ & $Y_2$ & $Y_1$ & $Y_2$ \\ \hline
+6.2 & 432 & 12.7 & 431 & 7 & 522 & 8.3 & 600 \\
+4.8 & 405 & 11.3 & 426 & 4.4 & 513 & 7.1 & 513 \\
+3.0 & 324 & 9.3 & 438 & 3.8 & 507 & 4.7 & 539 \\
+5.6 & 310 & 9.5 & 312 & 5.0 & 410 & 10.0 & 456 \\
+7.4 & 326 & 11.7 & 326 & 5.5 & 350 & 8.5 & 504 \\
+4.8 & 375 & 15.3 & 447 & 3.2 & 547 & 12.4 & 548 \\ \hline
+\end{tabular}
+\justify
+
+### Resolução
+
+Tabela de Manova:
+
+```{r echo=FALSE, message=FALSE}
+setwd('/home/gui/Área de Trabalho/LISTA 1 MAE 330')
+library(car)
+
+tanques <- c(6.2, 432, 12.7, 431, 7,   522, 8.3,  600,
+  4.8, 405, 11.3, 426, 4.4, 513, 7.1,  513,
+  3,   324, 9.3,  438, 3.8, 507, 4.7,  539,
+  5.6, 310, 9.5,  312, 5.0, 410, 10,   456,
+  7.4, 326, 11.7, 326, 5.5, 350, 8.5,  504,
+  4.8, 375, 15.3, 447, 3.2, 547, 12.4, 548)
+
+tanquey1 <- vector()
+tanquey2 <- vector()
+
+for(i in 1:(length(tanques)/2)){
+  tanquey1 <- c(tanquey1,tanques[2*i-1])
+  tanquey2 <- c(tanquey2,tanques[2*i])
+}
+
+reagentes <- rep(c(1,2,3,4),6)
+
+tanq <- data.frame(tanquey1,tanquey2,reagentes)
+
+
+Y <- cbind(tanquey1,tanquey2)
+
+fit.lm <- lm(Y~factor(reagentes), data=tanq)
+fit.manova <- Manova(fit.lm)
+summary(fit.manova, multivariate=TRUE)
+```
+
+Nós podemos observar com a tabela de MANOVA que para as duas variáveis reposta (medidas de clorofila e oxigênio dissolvido na água) temos efeitos significantes de tratamento (fixando um nível de significância de 5%) (em todos os testes realizados), para fazer a verificação das suposições do modelo, iremos realizar o teste igualdade de matrizes de covariaĉnias de M-Box e o de normalidade multivariada baseado na assimetria, assim:
+
+```{r echo =FALSE, message=FALSE}
+library(ICS)
+library(car)
+library(heplots)
+
+boxM(tanq[1:2],reagentes)
+mnv <- manova(Y~reagentes,data=tanq)
+mvnorm.skew.test(mnv$res) # teste de normalidade multivariada, baseada na Assimetria
+
+```
+
+Onde podemos verificar que as suposições de normalidade e homocedasticidade estão satisfeitas, e como encontramos significância estatística nas comparações iremos realizar as comparações múltiplas com a correção de Bonferroni para um $\alpha$ global de 5%, a fim de identificar onde estão as diferenças:
+
+Para o tratamento medidas de clorofila
+
+Diferença entre o Tratamento 1 e 2
+```{r echo =FALSE, message=FALSE}
+library(HoRM)
+med_tanq1 <- tapply(tanquey1,reagentes,mean)
+med_tanq2 <- tapply(tanquey2,reagentes,mean)
+
+vi <- qt(1-0.05/12,20)*sqrt(3*diag(SSCP.fn(mnv)$SSCPE)[1]/20) # variacao do intervalo
+dif12 <- med_tanq1[1] - med_tanq1[2]
+dif13 <- med_tanq1[1] - med_tanq1[3]
+dif14 <- med_tanq1[1] - med_tanq1[4]
+dif23 <- med_tanq1[2] - med_tanq1[3]
+dif24 <- med_tanq1[2] - med_tanq1[4]
+dif34 <- med_tanq1[3] - med_tanq1[4]
+c(dif12-vi,dif12+vi,use.names=F) # T1-T2
+```
+
+Diferença entre o Tratamento 1 e 3
+```{r echo =FALSE, message=FALSE}
+c(dif13-vi,dif13+vi,use.names=F) # T1-T3
+```
+
+Diferença entre o Tratamento 1 e 4
+```{r echo =FALSE, message=FALSE}
+c(dif14-vi,dif14+vi,use.names=F) # T1-T4
+```
+
+Diferença entre o Tratamento 2 e 3
+```{r echo =FALSE, message=FALSE}
+c(dif23-vi,dif23+vi,use.names=F) # T2-T3
+```
+
+Diferença entre o Tratamento 2 e 4
+```{r echo =FALSE, message=FALSE}
+c(dif24-vi,dif24+vi,use.names=F) # T2-T4
+```
+
+Para o tratamento de oxigênio dissolvido na água
+
+Diferença entre o Tratamento 1 e 2
+```{r echo =FALSE, message=FALSE}
+library(HoRM)
+
+med_tanq2 <- tapply(tanquey2,reagentes,mean)
+
+vi <- qt(1-0.05/12,20)*sqrt(3*diag(SSCP.fn(mnv)$SSCPE)[2]/20) # variacao do intervalo
+dif12 <- med_tanq2[1] - med_tanq2[2]
+dif13 <- med_tanq2[1] - med_tanq2[3]
+dif14 <- med_tanq2[1] - med_tanq2[4]
+dif23 <- med_tanq2[2] - med_tanq2[3]
+dif24 <- med_tanq2[2] - med_tanq2[4]
+dif34 <- med_tanq2[3] - med_tanq2[4]
+c(dif12-vi,dif12+vi,use.names=F) # T1-T2
+```
+
+Diferença entre o Tratamento 1 e 3
+```{r echo =FALSE, message=FALSE}
+c(dif13-vi,dif13+vi,use.names=F) # T1-T3
+```
+
+Diferença entre o Tratamento 1 e 4
+```{r echo =FALSE, message=FALSE}
+c(dif14-vi,dif14+vi,use.names=F) # T1-T4
+```
+
+Diferença entre o Tratamento 2 e 3
+```{r echo =FALSE, message=FALSE}
+c(dif23-vi,dif23+vi,use.names=F) # T2-T3
+```
+
+Diferença entre o Tratamento 2 e 4
+```{r echo =FALSE, message=FALSE}
+c(dif24-vi,dif24+vi,use.names=F) # T2-T4
+```
+
+# Exercício 2
+
+O plantio de amendoim é bastante importante nos Estados Unidos. Pesquisadores têm muito interesse
+em desenvolver variedades melhoradas para o plantio, e é bastante comum o delineamento
+de experimentos para comparar variedades. Os dados apresentados no arquivo T6-17.DAT são referentes a três diferentes variedades do amendoim, plantados em duas diferentes localidades.
+
+As variáveis observadas são:
+
+- $X_1$: Produção (peso);
+- $X_2$: grãos maduros (peso, em gramas);
+- $X_3$: tamanho da semente (peso, em gramas de 100 sementes).
+
+No arquivo, a primeira coluna refere-se a localização, a segunda é a variedade e as outras são
+$X_1$, $X_2$ e $X_3$, nesta ordem.
+
+(a) Faça a análise utilizando MANOVA de dois fatores. Teste o efeito de localização, variedade
+e interação entre variedade e localização.
+
+### Resolução
+
+Fazendo uma Manova, obtemos a seguinte tabela:
+
+```{r echo=FALSE,message=FALSE}
+
+dados2 <- t(matrix( c( 195.3,  153.1,  51.4,
+                       194.3,  167.7,  53.7,
+                       189.7,  139.5,  55.5,
+                       180.4,  121.1,  44.4,
+                       203.0,  156.8,  49.8,
+                       195.9,  166.0,  45.8,
+                       202.7,  166.1,  60.4,
+                       197.6,  161.8,  54.1,
+                       193.5,  164.5,  57.8,
+                       187.0,  165.1,  58.6,
+                       201.5,  166.8,  65.0,
+                       200.0,  173.8,  67.2),3,12))
+fat1 <- factor(c(1,1,2,2,1,1,2,2,1,1,2,2))
+fat2 <- factor(c(5,5,5,5,6,6,6,6,8,8,8,8))
+dat2 <- data.frame(trat=factor(rep(1:6,each=2)),dados2,factor(fat1),factor(fat2))
+attach(dat2)
+
+Y <- cbind(X1,X2,X3)
+
+fit.lm <- lm(Y~fat1+fat2+fat1*fat2, data=dat2)
+fit.manova <- Manova(fit.lm)
+summary(fit.manova, multivariate=TRUE)
+```
+\newpage
+
+Onde ao fixarmos um nível de significância de 5%, podemos notar os fatores localização e variedade são estatísticamente significante, porém o efeito de interação não é estatísticamente significante.
+
+
+(b) Faça análise de resíduos do modelo selecionado no item (a).
+
+### Resolução
+Fazendo uma análise de resíduos onde estamos supondo um modelo de Anova para cada variável, temos:
+
+Análise de resíduos para $X_1$: Produção (peso) como variável resposta
+\center
+```{r echo=FALSE,message=FALSE, out.width="70%"}
+mod1 <- aov(X1~fat1+fat2+fat1*fat2,data=dat2)
+mod2 <- aov(X2~fat1+fat2+fat1*fat2,data=dat2)
+mod3 <- aov(X3~fat1+fat2+fat1*fat2,data=dat2)
+anov1 <- anova(mod1)
+anov2 <- anova(mod2)
+anov3 <- anova(mod3)
+
+par(mfrow=c(2,2))
+plot(mod1$fit, mod1$res)
+mnv2res <- mod1$res # extraindo residuos
+s21 <- anov1$"Mean Sq"[4]
+respad <- (mnv2res/sqrt(s21)) # residuos padronizados
+hist(mod1$res) #4
+qqnorm(mnv2res) #5 normalidade
+qqline(mnv2res)
+plot(mnv2res) #6 independ?ncia
+shapiro.test(mnv2res)
+bartlett.test(X1~trat)
+```
+\justify
+\newpage
+
+Análise de resíduos para $X_1$: Produção (peso) como variável resposta
+\center
+```{r echo=FALSE,message=FALSE, out.width="70%"}
+par(mfrow=c(2,2))
+plot(mod2$fit, mod2$res, ylab="Resíduos", xlab="Preditos", main="Resíduos x Preditos")
+mod2res <- mod1$res # extraindo residuos
+s21 <- anov1$"Mean Sq"[4]
+respad <- (mod2res/sqrt(s21)) # residuos padronizados
+hist(mod1$res, main="Histograma", xlab="Resíduos") #4
+qqnorm(mod2res) #5 normalidade
+qqline(mod2res)
+plot(mod2res,main="Indepêndencia",xlab="Índice", ylab="Resíduos Pad") #6 independencia
+shapiro.test(mod2res)
+bartlett.test(X2~trat)
+```
+\justify 
+\newpage
+
+Análise de resíduos para $X_3$: tamanho da semente (peso, em gramas de 100 sementes) como variável resposta
+
+\center
+```{r echo=FALSE,message=FALSE, out.width="70%"}
+par(mfrow=c(2,2))
+plot(mod3$fit, mod3$res, ylab="Resíduos", xlab="Preditos", main="Resíduos x Preditos")
+mod3res <- mod3$res # extraindo residuos
+s21 <- anov1$"Mean Sq"[4]
+respad <- (mod3res/sqrt(s21)) # residuos padronizados
+hist(mod3$res, main="Histograma", xlab="Resíduos") #4
+qqnorm(mod3res) #5 normalidade
+qqline(mod3res)
+plot(mod3res,main="Indepêndencia",xlab="Índice", ylab="Resíduos Pad") #6 independencia
+shapiro.test(mod3res)
+bartlett.test(X3~trat)
+```
+\justify
+
+Assim como podemos ver nos gráficos de resíduos e testes temos todas as suposições (normalidade, independência e homocedasticidade) satisfeitas.
+
+(c) Faça a análise dos dados utilizando 3 ANOVAS univariadas de dois fatores. Compare os
+resultados.
+
+### Resolução
+
+Considerando um primeiro modelo de Anova com o $X_1$: Produção (peso) e os fatores localização e variedade obtermos a seguinte tabela:
+
+\center
+```{r echo=FALSE,message=FALSE, out.width="70%"}
+mod1 <- aov(X1~fat1+fat2+fat1*fat2,data=dat2)
+anov1 <- round(anova(mod1),2)
+knitr::kable(caption = "Anova Produção", anov1)
+```
+
+\justify
+
+Com a tabela de Anova acima podemos concluir que considerando a produção (peso), não temos efeito de localização, porém o efeito de variação dos graõs e a interação entre eles é sifnificante. Assim abaixo segue as comparações múltiplas com a correção de Bonferroni para um $\alpha$ global de 5%
+
+Considerando um primeiro modelo de Anova com o $X_2$: grãos maduros (peso, em gramas) e os fatores localização e variedade obtermos a seguinte tabela:
+
+\center
+```{r echo=FALSE,message=FALSE, out.width="70%"}
+mod2 <- aov(X2~fat1+fat2+fat1*fat2,data=dat2)
+anov2 <- round(anova(mod2),2)
+knitr::kable(caption = "Anova grãos maduros", anov2)
+```
+
+\justify
+
+Com a tabela de Anova acima podemos concluir que considerando os grãos maduros (peso), não temos efeito de localização, porém o efeito de variação dos graõs e a interação entre eles é sifnificante. Assim abaixo segue as comparações múltiplas com a correção de Bonferroni para um $\alpha$ global de 5%
+
+Considerando um primeiro modelo de Anova com o $X_3$: tamanho da semente (peso, em gramas de 100 sementes) e os fatores localização e variedade obtermos a seguinte tabela:
+
+\center
+```{r echo=FALSE,message=FALSE, out.width="70%"}
+mod3 <- aov(X3~fat1+fat2+fat1*fat2,data=dat2)
+anov3 <- round(anova(mod3),2)
+knitr::kable(caption = "Anova tamanho da semente", anov3)
+```
+
+\justify
+
+Com a tabela de Anova acima podemos concluir que considerando tamanho da semente (peso, em gramas de 100 sementes), não temos efeito de localização e a interação entre eles, porém o efeito de variação dos graõs é estatísticamente significante. Assim abaixo segue as comparações múltiplas com a correção de Bonferroni para um $\alpha$ global de 5%
+
+
+
+# Exercício 3
+
+3. Considere os dados de poluição do ar disponíveis no arquivo T1-5.dat. Esses dados são referentes
+a 52 medidas obtidas ao meio-dia em uma estação em Los Angeles em diversos dias. As variáveis
+observadas são:
+
+- $1^a$ coluna: vento
+- $2^a$ coluna: radiação solar
+- $3^a$ coluna: CO
+- $4^a$ coluna: NO
+- $5^a$ coluna: NO$_2$
+- $6^a$ coluna: O$_3$
+- $7^a$ coluna: HC
+
+Considere que as variáveis resposta são $Y_1$ = NO$_2$ e Y2 = O$_3$ e considere como preditoras apenas
+as variáveis $Z_1$ = vento e $Z_2$ = radiação solar.
+
+(a) Ajuste um modelo de regressão utilizando apenas a primeira variável resposta $Y_1$. Obtenha
+um intervalo de predição para NO$_2$ correspondente a $z_1$ = 10 e $z_2$ = 80 com confiança igual
+a 95%.
+
+### Resolução
+
+Ajustando o modelo sob condições de normalidade, independência entre observações e homocedasticidade, obtermos a equação $Y_1=10.115-0.211z_1+0.02z_2$, assim temos para $z_1=10$ e $z_2=80$ o valor de 9.646 com o intervalo de predição na tabela abaixo:
+
+```{r echo=FALSE}
+dados <- read.table("T1-5.dat", quote="\"", comment.char="")
+names(dados) <- c("vento","radiacao","CO","NO","NO2","O3","HC")
+attach(dados)
+
+ml1 <- lm(NO2~vento + radiacao, data = dados)
+z <- data.frame(vento = 10, radiacao=80)
+p <- predict(ml1, z,interval =  "prediction")
+knitr::kable(caption = "Intervalo de Predição", p)
+```
+
+(b) Ajuste um modelo de regessão multivariado com as respostas $Y_1$ e $Y_2$. Leia a seção do livro
+do Johnson "Predictions from Multivariate Multiple Regressions" (página 399 da sexta edição) e obtenha uma elipse de predição para $Y_1$ e $Y_2$ correspondente a $z_1$ = 10 e $z_2$ = 80. Compare com o resultado do item anterior.
+
+Observação: No arquivo Elipse-predicao.r, existe uma função que faz o gráfico da elipse
+utilizando os pacotes car e ggplot2 e um exemplo com os dados apresentados em aula.
+
+### Resolução
+
+Seja $\mathbf{Y}=[Y_1,Y_2]$ e tomando o modelo $\mathbf{Y}=\mathbf{Z}{\beta}+\epsilon$ onde $Z=[z_1,z_2]$, ${\beta}=[{\beta_{(1)}},{\beta_{(2)}}]$ e $\epsilon=[\epsilon_1,\epsilon_2]$, sob suposição de normalidade multivariada, chegamos a uma elipse de predição abaixo, onde podemos notar que com o modelo múltiplo multivariado nós temos um intervalo de predição mais preciso olhando apenas para a variável resposta $Y_1$.
+
+\center
+```{r echo=FALSE, out.width="70%"}
+predictionEllipse <- function(mod, newdata, level = 0.95, ggplot = TRUE){
+  # labels
+  lev_lbl <- paste0(level * 100, "%")
+  resps <- colnames(mod$coefficients)
+  title <- paste(lev_lbl, "confidence ellipse for", resps[1], "and", resps[2])
+  
+  # prediction
+  p <- predict(mod, newdata)
+  
+  # center of ellipse
+  cent <- c(p[1,1],p[1,2])
+  
+  # shape of ellipse
+  Z <- model.matrix(mod)
+  Y <- mod$model[[1]]
+  n <- nrow(Y)
+  m <- ncol(Y)
+  r <- ncol(Z) - 1
+  S <- crossprod(resid(mod))/(n-r-1)
+  
+  # radius of circle generating the ellipse
+  tt <- terms(mod)
+  Terms <- delete.response(tt)
+  mf <- model.frame(Terms, newdata, na.action = na.pass, 
+                    xlev = mod$xlevels)
+  z0 <- model.matrix(Terms, mf, contrasts.arg = mod$contrasts)
+  rad <- sqrt((m*(n-r-1)/(n-r-m))*qf(level,m,n-r-m)*z0%*%solve(t(Z)%*%Z) %*% t(z0))
+  
+  # generate ellipse using ellipse function in car package
+  ell_points <- car::ellipse(center = c(cent), shape = S, radius = c(rad), draw = FALSE)
+  
+  # ggplot2 plot
+  if(ggplot){
+    require(ggplot2, quietly = TRUE)
+    ell_points_df <- as.data.frame(ell_points)
+    ggplot(ell_points_df, aes(x, y)) +
+      geom_path() +
+      geom_point(aes(x = NO2, y = O3 ), data = data.frame(p)) +
+      labs(x = resps[1], y = resps[2], 
+           title = title)
+  } else {
+    # base R plot
+    plot(ell_points, type = "l", xlab = resps[1], ylab = resps[2], main = title)
+    points(x = cent[1], y = cent[2])
+  }
+}
+
+mlm1 <- lm(cbind(NO2, O3) ~ vento + radiacao, data = dados)
+z <- data.frame(vento = 10, radiacao=80)
+p1 <- predict(mlm1, z)
+predictionEllipse(mod = mlm1, newdata = z)
+
+```
+\justify
+
+# Exercício 4
+
+O arquivo pottery.csv contém informações sobre análise química de cerâmicas Romano-Britânicas
+encontradas em 3 diferentes regiões. As nove primeiras colunas dos dados contém informações
+sobre nove óxidos e a última coluna sobre a localização onde a cerâmica foi encontrada (Região
+1 correspondem a localização ou kiln 1, Região 2 contém localizações 2 e 3, e Região 3 é formada
+pelas localizações 4 e 5). A descrição dos dados está a seguir:
+
+Romano-British Pottery Data
+
+Description
+
+Chemical composition of Romano-British pottery.
+
+Format
+
+A data frame with 45 observations on the following 9 chemicals.
+
+Al2O3 aluminium trioxide.
+
+Fe2O3 iron trioxide.
+
+MgO magnesium oxide.
+
+CaO calcium oxide.
+
+Na2O natrium oxide.
+
+K2O calium oxide.
+
+TiO2 titanium oxide.
+
+MnO mangan oxide.
+
+BaO barium oxide.
+
+kiln site at which the pottery was found.
+
+Details
+
+The data gives the chemical composition of specimens of Romano-British pottery, determined by
+atomic absorption spectrophotometry, for nine oxides.
+
+Source
+
+A. Tubb and N. J. Parker and G. Nickless (1980), The analysis of Romano-British pottery by atomic
+absorption spectrophotometry. Archaeometry, 22, 153-171.
+
+Obtenha representações gráficas multivariadas para visualização dos dados, identificando as
+regiões onde as cerâmicas foram encontradas. Interprete os resultados.
+
+### Resolução
+
+Primeiramente, foi feito os Boxplot's univariados de cada substância por região:
+\center
+```{r echo=F, out.width="110%",fig.width=10,fig.height=8}
+pottery <- read.csv("pottery.csv")
+attach(pottery)
+regiao <- as.character(c(rep(1,21),rep(2,14),rep(3,10)))
+
+pottery <- cbind(pottery,regiao)
+
+par(mfrow=c(3,3))
+boxplot(Al2O3~regiao)
+boxplot(Fe2O3~regiao)
+boxplot(MgO~regiao)
+boxplot(CaO~regiao)
+boxplot(Na2O~regiao)
+boxplot(K2O~regiao)
+boxplot(TiO2~regiao)
+boxplot(MnO~regiao)
+boxplot(BaO~regiao)
+```
+\justify
+
+Pode-se ver que o valor mediano é menor na região 2 que nas demais na substância $Al_2O_3$, entretanto na mesma região há maior concentração de MgO, $K_2O$ e MnO que as demais. Nas substâncias $Fe_2O_3$, CaO e $Na_2O$ a região 1 é onde há maiores concentrações, seguida pela 2 e por fim a região 3. Para a substância $TiO_2$ o que chama a atenção é a variabilidade da terceira região ser alta, sua mediana ser próxima a da região 1 e maior que a região 2. Na última substância, BaO, o valor mediano apartenta ser igual para todas as regiões. A seguir foi feito mais Boxplot's mas agora de todas as substâncias em cada região separadamente.
+\center
+```{r echo=F, out.width="65%"}
+reg1 <- pottery[1:21,]
+reg2 <- pottery[22:35,]
+reg3 <- pottery[36:45,]
+
+plt <- boxplot(reg1$Al2O3,reg1$Fe2O3,reg1$MgO,reg1$CaO,reg1$Na2O,reg1$K2O,reg1$TiO2,reg1$MnO,reg1$BaO,ylim=c(0,20), ylab="Composição quimica",names=(c("Al2O3","Fe2O3","MgO","CaO","Na2O","K2O","TiO2","MnO","BaO")),las=2, main="Elementos quimicos: Região 1")
+```
+
+```{r echo=F, out.width="65%"}
+boxplot(reg2$Al2O3,reg2$Fe2O3,reg2$MgO,reg2$CaO,reg2$Na2O,reg2$K2O,reg2$TiO2,reg2$MnO,reg2$BaO,ylim=c(0,20), ylab="Composição quimica",names=(c("Al2O3","Fe2O3","MgO","CaO","Na2O","K2O","TiO2","MnO","BaO")),las=2, main="Elementos quimicos: Região 2")
+```
+
+```{r echo=F, out.width="65%"}
+boxplot(reg3$Al2O3,reg3$Fe2O3,reg3$MgO,reg3$CaO,reg3$Na2O,reg3$K2O,reg3$TiO2,reg3$MnO,reg3$BaO,ylim=c(0,20), main="Elementos quimicos: Região 3",  ylab="Composição quimica",names=(c("Al2O3","Fe2O3","MgO","CaO","Na2O","K2O","TiO2","MnO","BaO")),las=2)
+```
+\justify
+É visível que em todas as regiões há uma grande concentração de $Al_2O_3$ com uma variabilidade maior que as demais substâncias. Na região 1 podemos verificar também que a segunda maior concentração é de $Fe_2O_3$ e as demais possuem concentrações abaixo de 5. Na segunda região notamos a média concentração de $Fe_2O_3$, MgO e $K_2O$ e as demais substâncias com valores bem abaixo destas. Na última região não existe destaque de outras substâncias além da $Al_2O_3$. Realiza-se então o diagrama de disperção para as substâncias duas a duas.
+
+```{r echo=F}
+pairs(pottery[,c(2:10)], pch=16, col=regiao, cex=0.6)
+```
+
+Os dados em preto representa a primeira região, em vermelho a região 2 e por fim, a última região é representada pela cor verde. Neste gráfico é possível visualizar todas as conclusões já extraidas nos gráficos anteriores mas em apenas um gráfico.
