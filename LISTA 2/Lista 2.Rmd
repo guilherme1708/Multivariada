@@ -1,0 +1,460 @@
+---
+title: "Lista 2 - MAE0330"
+author: 'Guilherme NºUSP: 8943160 e Leonardo NºUSP: 9793436'
+output:
+  pdf_document:
+    fig_crop: no
+    keep_tex: yes
+    latex_engine: xelatex
+header-includes:
+- \usepackage{multirow}
+- \usepackage{ragged2e}
+- \usepackage{booktabs}
+---
+
+# Exercício 2
+
+Considere os dados de cinco unidades amostrais apresentados na tabela a seguir:
+
+\center
+\begin{tabular}{c|cc}
+\hline
+\textbf{Item} & \textbf{$X_1$} & \textbf{$X_2$} \\ \hline
+A & 2 & 0 \\
+B & 5 & 2 \\
+C & 1 & 4 \\
+D & 8 & 4 \\
+E & 7 & 4 \\ \hline
+\end{tabular}
+\justify
+
+(b) Refaça o agrupamento utilizando o método de Ward.
+
+### Resolução
+
+```{r echo=FALSE, out.width="80%",message=FALSE, fig.align="center"}
+library(ggplot2)
+library(factoextra)
+
+x1 <- c(2,5,1,8,7)
+x2 <- c(0,2,4,4,4)
+dados <- data.frame(x1,x2)
+rownames(dados) <- c("A","B","C","D","E")
+
+d_pad <- dist(scale(dados))
+clus <- hclust(d_pad, method="ward.D")
+
+fviz_dend(clus, k = 2,                 # Cut in four groups
+          cex = 0.5,                 # label size
+          k_colors = c("#2E9FDF", "#FC4E07"),
+          color_labels_by_k = TRUE,  # color labels by groups
+          ggtheme = theme_gray()     # Change theme
+) + labs(title="Dendograma",y="Distâncias",x="Agrupamentos") 
+```
+
+Assim podemos notar que as unidades amostrais D e E formam um grupo e A, B e C formam outro grupo.
+\newpage
+
+# Exercício 3
+
+A matriz abaixo corresponde a matriz de correlação entre as ações de 5 empresas:
+
+\center
+\includegraphics[width=400pt]{/home/gui/ta.png}
+\justify
+
+Considerando as correlações amostrais como medidas de similaridade, agrupe as empresas utilizando o método de agrupamento hierárquico do vizinho mais longe. Construa o correspondente dendrograma e discuta os resultados.
+
+### Resolução
+
+```{r echo=FALSE, out.width="80%",message=FALSE, fig.align="center"}
+m.cor <- matrix(c(1,0.63,0.51,0.12,0.16,
+                  0.63,1,0.57,0.32,0.21,
+                  0.51,0.57,1,0.18,0.15,
+                  0.12,0.32,0.18,1,0.68,
+                  0.16,0.21,0.15,0.68,1),5,5)
+
+d_pad <- dist(scale(m.cor))
+
+clus <- hclust(d_pad, method="complete")
+clus$labels <- setNames(c("JP_Morgan","Citibank","Wells_F.","Royal_D.","Exxon_M."), 1:5)
+
+fviz_dend(clus, k = 2,                 # Cut in four groups
+          cex = 0.5,                 # label size
+          k_colors = c("#2E9FDF", "#FC4E07"),
+          color_labels_by_k = TRUE,  # color labels by groups
+          ggtheme = theme_gray()     # Change theme
+) + labs(title="Dendograma: Vizinho mais longe",y="Distâncias",x="Agrupamentos") 
+```
+
+Primeiramente observando a matriz de correlação as empresas JP Morgan, Wells Fargo e Citibank apresentaram uma correlação maior que 0.5 enquanto as empresas Royal Dutch Shell e Exxon Mobil apresentam uma correlação de 0.68, com uma breve pesquisa na internet podemos notar que os agrupamentos que podem contidos no dendograma das empresas JP Morgan, Wells Fargo e Citibank como um grupo 1 e Royal Dutch Shell e Exxon Mobil como grupo 2, fazem sentindo pois o grupo 1 são bancos e o grupo 2 são petrolíferas.
+\newpage
+
+# Exercício 4
+
+Os dados no arquivo **primate.scapulae.txt** são referentes a medidas feitas na escápula de cinco diferentes gêneros de primatas Hominoidea (Hylobates, Pong, Pan, Gorilla e Homo). As medidas estão nas variáveis AD.BD, AD.CD, EA.CD, Dx.CD, SH.ACR, EAD, $\beta$ e $\gamma$. As cinco primeiras medidas são ı́ndices e as três últimas são ângulos. O ângulo γ não está disponı́vel para os primatas Homo e, portanto, não deve ser usado na análise. Cuidado na leitura dos dados no formato texto, pois as medidas faltantes não estão representadas por **NA**. Com auxı́lio computacional, considerando apenas as 7 medidas das escápulas disponı́veis, faça o agrupamento dos dados utilizando os métodos do vizinho mais próximo, vizinho mais longe, média das distâncias e também com o método hierárquico divisivo. Obtenha os correspondentes dendrogramas e compare os resultados do agrupamento com 5 grupos. Compare os agrupamentos com a classificação correta dos primatas (que não foi usada para a obtenção dos grupos). Para isso, você pode calcular as taxas de classificação incorreta e correta. Discuta os resultados.
+
+### Resolução
+
+```{r echo=FALSE, out.width="65%",fig.align="center"}
+library(cluster)
+
+dados <- read.csv("primate.scapulae.txt",sep=" ")
+
+d_pad <- dist(scale(dados[2:8]))
+
+clus_c <- hclust(d_pad, method="complete")
+fviz_dend(clus_c, k = 5,                 # Cut in four groups
+          cex = 0.5,                 # label size
+          k_colors = c("#0000FF", "#00FF00", "#990000", "#FF6600", "#FF33FF"),
+          color_labels_by_k = TRUE,  # color labels by groups
+          ggtheme = theme_gray()     # Change theme
+) + labs(title="Dendograma: Vizinho mais longe",y="Distâncias",x="Agrupamentos") 
+
+clus_s <- hclust(d_pad, method="single")
+fviz_dend(clus_s, k = 5,                 # Cut in four groups
+          cex = 0.5,                 # label size
+          k_colors = c("#0000FF", "#00FF00", "#990000", "#FF6600", "#FF33FF"),
+          color_labels_by_k = TRUE,  # color labels by groups
+          ggtheme = theme_gray()     # Change theme
+) + labs(title="Dendograma: Vizinho mais próximo",y="Distâncias",x="Agrupamentos") 
+
+clus_a <- hclust(d_pad, method="average")
+fviz_dend(clus_a, k = 5,                 # Cut in four groups
+          cex = 0.5,                 # label size
+          k_colors = c("#0000FF", "#00FF00", "#990000", "#FF6600", "#FF33FF"),
+          color_labels_by_k = TRUE,  # color labels by groups
+          ggtheme = theme_gray()     # Change theme
+) + labs(title="Dendograma: Média das Distâncias",y="Distâncias",x="Agrupamentos") 
+
+clus_d <- diana(d_pad, diss=TRUE)
+fviz_dend(clus_d, k = 5,                 # Cut in four groups
+          cex = 0.5,                 # label size
+          k_colors = c("#0000FF", "#00FF00", "#990000", "#FF6600", "#FF33FF"),
+          color_labels_by_k = TRUE,  # color labels by groups
+          ggtheme = theme_gray()     # Change theme
+) + labs(title="Dendograma: DIANA",y="Distâncias",x="Agrupamentos") 
+```
+
+A fim de obter uma vizualização para as classificações, reduzimos a dimensionalidade do dados utilizando componentes principais, e apenas com 2 componentes nós temos 3.67 % da variância total explicada pelas componentes. Nos métodos do vizinho mais longe e DIANA, não observa-se grupos com apenas uma observação como é visto nos métodos do vizinho mais próximo e da média das distâncias.
+
+```{r echo=F, message=F, out.width="70%",fig.align="center"}
+previsoes_c <- cutree(clus_c,5)
+previsoes_s <- cutree(clus_s,5)
+previsoes_a <- cutree(clus_a,5)
+previsoes_d <- cutree(clus_d,5)
+taxa_c <- 0
+taxa_s <- 0
+taxa_a <- 0
+taxa_d <- 0
+for(i in 1:105){
+  if(previsoes_c[i]==dados$classdigit[i]){
+  taxa_c <- taxa_c+1
+  }
+  if(previsoes_s[i]==dados$classdigit[i]){
+  taxa_s <- taxa_s+1
+  }
+  if(previsoes_a[i]==dados$classdigit[i]){
+  taxa_a <- taxa_a+1
+  }
+  if(previsoes_d[i]==dados$classdigit[i]){
+  taxa_d <- taxa_d+1
+  }
+}
+clusplot(dados[,2:8],previsoes_c,main="Vizinho mais longe")
+```
+Taxa de acertos método Vizinho mais longe (%):
+
+```{r echo=F, message=F, out.width="70%",fig.align="center"}
+round(taxa_c/length(dados[,1]) ,3)*100
+```
+
+```{r echo=F, message=F, out.width="70%",fig.align="center"}
+clusplot(dados[,2:8],previsoes_s,main="Vizinho mais próximo")
+```
+
+Taxa de acertos método Vizinho mais próximo (%):
+```{r echo=F}
+round(taxa_s/length(dados[,1]),3)*100
+```
+
+```{r echo=F, message=F, out.width="70%",fig.align="center"}
+clusplot(dados[,2:8],previsoes_a,main="Média das Distâncias")
+```
+
+Taxa de acertos método Média das Distâncias (%):
+```{r echo=F}
+round(taxa_a/length(dados[,1]),3)*100
+```
+
+```{r echo=F, message=F, out.width="70%",fig.align="center"}
+clusplot(dados[,2:8],previsoes_d,main="DIANA")
+```
+
+Taxa de acertos método DIANA (%):
+```{r echo=F}
+round(taxa_d/length(dados[,1]) ,3)*100
+```
+
+```{r echo=F, message=F, out.width="70%",fig.align="center"}
+clusplot(dados[,2:8],dados$classdigit,main="Classificação correta")
+```
+
+Pelos gráficos e taxas de classificação obtidos, no método do vizinho mais longe há um grupo com observações próximas de outros grupos, causando um confundimento, entretanto sua taxa foi a segunda maior. Para o segundo método há um grupo muito grande e três grupos com poucas observações. No método da média das distâncias, aparentemente há dois grupos muito parecidos se confundindo e um grupo com apenas uma observação. Os dois métodos anteriores apresentaram as piores taxas de classificação. O último método obteve a maior taxa de classificação e os grupos parecem distintos com exceção de 2 grupos que estão bem próximos. Comparando com a classificação correta é possível ver que nenhum método conseguiu identificar que existia dois grupos próximos na coordenada (2,1).
+
+# Exercício 5
+
+Considere a seguinte matriz de variância amostral das variávies $X_1$ e $X_2$ :
+
+$$
+S = \begin{bmatrix}
+5 & 2\\ 
+2 & 2
+\end{bmatrix}
+$$
+
+(a) Obtenha as componentes principais de S, bem como a variância explicada por cada componente.
+
+### Resolução
+```{r echo=FALSE, out.width="70%",fig.align="center"}
+library(factoextra)
+S <- matrix(c(5,2,2,2),2,2)
+
+PCA <- princomp(S, cor=F)
+summary(PCA, loadings=TRUE)
+```
+
+Como podemos observar toda a variância pode ser explicada apenas com a componete 1
+
+(b) Obtenha a matriz de correlação dos dados a partir de S. Obtenha as componentes principais com base na matriz de correlação e também a variância explicada por cada componente. Compare os resultados com o item anterior.
+
+### Resolução
+
+Matriz de correlação:
+
+$$
+C = \begin{bmatrix}
+1 & 0.632\\ 
+0.632 & 1
+\end{bmatrix}
+$$
+
+```{r echo=FALSE, out.width="70%",fig.align="center"}
+cor <- c(S[2]/(sqrt(S[1])*sqrt(S[4])))
+
+C <- matrix(c(1,cor,cor,1),2,2)
+
+PCA_c <- princomp(C, cor=F)
+
+summary(PCA_c, loadings=TRUE)
+
+```
+
+Comparando com o item anterior, pode-se observar que toda a variância pode ser explicada apenas com a primeira componete nos dois casos. Entretanto no primeiro caso a primeira componente era a primeira variável, por outro lado com a matriz de correlação a primeira compotente é a oposição entre a primeira e a segunda variável.
+
+# Exercício 6
+
+Os dados das variáveis $X_1$ (vendas) e $X_2$ (lucro) das 10 maiores empresas no mundo em 2000 estão disponı́veis no exercı́cio 1.4 do livro do Johnson. O vetor de médias resultante e a matriz de variância são dados por
+
+\center
+\includegraphics[width=200pt]{/home/gui/ms.png}
+\justify
+
+(a) Obtenha as componentes principais de S e suas variâncias.
+
+### Resolução
+```{r echo=FALSE}
+S <- matrix(c(7476.45,303.62,303.62,26.19),2,2)
+
+PCA <- princomp(S, cor=F)
+summary(PCA, loadings=TRUE)
+```
+
+(b) Calcule a proporção da variância explicada pela primeira componente principal. Obtenha as correlações entre a primeira componente principal e as variáveis originais. Com base nos coeficientes e nas correlações, interprete a primeira componente principal.
+
+### Resolução
+A proporção da variância explicada pela primeira componente principal é de:
+
+```{r echo=FALSE}
+autovalores <- eigen(S)$values
+autovalores[1]/sum(autovalores)
+```
+
+As correlações entre a primeira componente principal e as variáveis originais são:
+
+```{r echo=F}
+corr1 <- sqrt(eigen(S)$values[1])*eigen(S)$vectors[1,1]/sqrt(7476.45)
+corr2 <- sqrt(eigen(S)$values[2])*eigen(S)$vectors[1,2]/sqrt(26.19)
+knitr::kable(caption = "Correlção var. orginais e comp.",c(corr1,corr2),col.names = "Correlação")
+```
+
+Com essas informações, conclui-se que a primeira componente explica a maioria da variabilidade total (99,82%) e essa é mais correlacionada com a primeira variável, logo a primeira variável é suficiente para a interpretação do problema.
+
+(c) Refaça os itens (a) e (b) utilizando a matriz de correlção dos dados. Compare os resultados.
+
+### Resolução
+
+```{r echo=FALSE}
+R <- matrix(c(1,303.62/sqrt(7476.45*26.19),303.62/sqrt(7476.45*26.19),1),2,2)
+
+PCA_R <- princomp(R, cor=F)
+summary(PCA_R, loadings=TRUE)
+```
+
+A proporção da variância explicada pela primeira componente principal é de:
+
+```{r echo=FALSE}
+autovalores_R <- eigen(R)$values
+autovalores_R[1]/sum(autovalores_R)
+```
+
+As correlações entre a primeira componente principal e as variáveis originais são:
+
+```{r echo=F}
+corr1_R <- sqrt(eigen(R)$values[1])*eigen(R)$vectors[1,1]
+corr2_R <- sqrt(eigen(R)$values[2])*eigen(R)$vectors[1,2]
+knitr::kable(caption = "Correlção var. orginais e comp.",c(corr1_R,corr2_R),col.names = "Correlação")
+```
+
+Comparando com os itens anteriores, assumimos que o primeiro componente é a oposição entre a primeira e a segunda variável, este possui 84,31% da variabilidade total dos dados. A componente ainda está mais correlacionada com a primeira variável mas a correlação da segunda variável é maior que no item b.
+
+# Exercício 7
+
+Os dados no arquivo **T8-6.DAT** são referentes a recordes nacionais masculinos de corrida para diversos paı́ses. As colunas são referentes aos tempos recordes nas seguintes modalidades, respectivamente:
+
+- 100 m (segundos);
+
+- 200 m (segundos);
+
+- 400 m (segundos);
+
+- 800 m (minutos);
+
+- 1500 m (minutos);
+
+- 5000 m (minutos);
+
+- 10.000 m (minutos); 
+
+- Maratona (minutos).
+
+(a) Obtenha a matriz de correlação dos dados e seus autovalores e autovetores.
+
+### Resolução
+
+Seja $\lambda_1,...,\lambda_8$ os autovalores e $e_1,...,e_8$ os autovalores da matriz de correlação dos dados, assim:
+
+```{r echo=FALSE}
+dat <- read.table("T8-6.DAT")
+names(dat) <- c("Pais","100m","200m","400m","800m","1500m","5000m","10000m","Maratona")
+
+knitr::kable(caption="Matrix de Correlações", cor(dat[2:9]))
+
+auto_v <- eigen(cor(dat[2:9]))
+
+knitr::kable(caption="Autovalores", round(t(auto_v$values),3),col.names = c( "$\\lambda_1$","$\\lambda_2$","$\\lambda_3$","$\\lambda_4$","$\\lambda_5$","$\\lambda_6$","$\\lambda_7$","$\\lambda_8$"))
+
+knitr::kable(caption="Autovetores", round(auto_v$vectors,3),col.names = c("$e_1$","$e_2$","$e_3$","$e_4$","$e_5$","$e_6$","$e_7$","$e_8$"))
+
+```
+
+(b) Obtenha as duas primeiras componentes principais das variáveis padronizadas. Obtenha também as correlações entre as variáveis originais e as duas primeiras componentes principais, além da variabilidade (acumulada) explicada por cada componente.
+
+### Resolução
+
+Primeiramente é obtido os autovalores e autovetores, em seguida as duas primeiras componentes principais das variáveis padronizadas:
+
+```{r echo=FALSE}
+dat_padr <- scale(dat[2:9])
+dat_padr <- data.frame(dat_padr)
+
+auto_v_p <- eigen(cor(dat_padr))
+
+knitr::kable(caption="Autovalores", round(t(auto_v_p$values),3),col.names = c( "$\\lambda_1$","$\\lambda_2$","$\\lambda_3$","$\\lambda_4$","$\\lambda_5$","$\\lambda_6$","$\\lambda_7$","$\\lambda_8$"))
+
+knitr::kable(caption="Autovetores", round(auto_v_p$vectors,3),col.names = c("$e_1$","$e_2$","$e_3$","$e_4$","$e_5$","$e_6$","$e_7$","$e_8$"))
+```
+
+\newpage
+```{r echo=FALSE}
+duas_pc <- auto_v_p$vectors[,1:2]
+knitr::kable(caption="Componetes Principais", round(duas_pc,3),col.names = c("Com. 1","Comp. 2"))
+```
+
+
+Obtemos então as correlações entre as duas primeiras componentes principais, respectivamente, e as variáveis originais:
+
+```{r echo=F}
+corr_1comp <- sqrt(eigen(cor(dat_padr))$values[1])*eigen(cor(dat_padr))$vectors[,1]
+corr_2comp <- sqrt(eigen(cor(dat_padr))$values[2])*eigen(cor(dat_padr))$vectors[,2]
+knitr::kable(caption = "Correlção var. orginais e comp. Principais",c(corr1,corr2),col.names = "Correlação")
+
+```
+
+Por fim obtemos a variabilidade (acumulada) explicada por cada componente:
+
+```{r echo=F}
+acum <- vector()
+for(i in 1:8){
+  acum[i] <- sum(auto_v_p$values[1:i])/sum(auto_v_p$values)
+}
+knitr::kable(caption = "Variabilidade Explicada (acumulada) por cada comp.",t(as.matrix(acum)),col.names = c("Comp.1","Comp.2","Comp.3","Comp.4","Comp.5","Comp.6","Comp.7","Comp.8"))
+```
+
+(c) Interprete as duas primeiras componentes obtidas no item anterior.
+
+### Resolução
+
+Pelo item anterior, a primeira componente está associada à todas as variaveis e a segunda ao contraste entre as variáveis (100m, 200m, 400m) e (1500m, 5000m, 10000m, Maratona), ou seja a diferença entre corridas pequenas e grandes. Essas duas componentes representam 91,77% da variabilidade total.
+
+(d) Ordene os paı́ses com base nos escores obtidos para a primeira componente principal e
+discuta os resultados.
+
+### Resolução
+
+```{r echo=FALSE}
+comp1 <- c(rep(0,54))
+for (j in 1:54){
+  for( i in 1:8){
+  comp1[j] <- comp1[j] + duas_pc[i,1]*dat[j,i+1]
+  }
+}
+rank <- data.frame(comp1,dat$Pais)
+knitr::kable(rank[order(rank$comp1, rank$dat.Pais, decreasing=c(TRUE, FALSE)), ])
+```
+
+Pelo escores obtidos, o país com menor tempo nas provas pela primeira componente foi os EUA e os piores tempos são de Samoa e das Ilhas Cook, as quais aparecem com um valor muito diferente dos demais países.
+
+# Exercício 8
+
+O arquivo **oleo.csv** apresenta um sumário de consumo de petróleo em alguns paı́ses no ano de 2011. O consumo é apresentado em consumo diário (em $m^3$) e em consumo per capita (em $m^3$) e a tabela contém informação sobre a razão produção/consumo. Faça uma análise de componentes principais com os dados. Obtenha o *screeplot* e o *biplot*. Interprete o biplot, destacando possı́veis agrupamentos de nações.
+
+### Resolução
+
+```{r echo=FALSE,out.width="60%",fig.align='center'}
+dado <- read.csv("oleo.csv")
+rownames(dado) <- dado$Nation
+
+cor(dado[-1])
+
+PCA <- princomp(dado[-1], cor=T)
+summary(PCA, loadings=TRUE)
+
+
+screeplot(PCA,
+         type="lines",
+         pch=16,
+         col="turquoise4",
+         main=" Scree Plot",
+         ylim=c(0,2))
+abline(h=1,lty=3)
+```
+
+Segundo o critério de Kaiser que considera que o número de componentes principais tem autovalores maiores que 1, assim observando o Scree plot acima, duas componentes principais é suficiente para explicar a maior parte da variavilidade dos dados.
+
+```{r echo=FALSE,out.width="80%",fig.align='center'}
+# BIPLOT
+biplot(PCA, choices=1:2,main="Biplot")
+```  
+
+Observando o biplot acima, podemos notar que países como EUA e China tem grandes populações e consumo de petróleo, Arábia Saudita tem grande consumo per capita e que os outros países se concentram pela razão produção/consumo e cosumo per capita.
