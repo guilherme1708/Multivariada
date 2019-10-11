@@ -1,0 +1,767 @@
+---
+title: "Lista 3 - MAE0330"
+author: 'Guilherme NºUSP: 8943160 e Leonardo NºUSP: 9793436'
+output:
+  pdf_document:
+    fig_crop: no
+    keep_tex: yes
+    latex_engine: xelatex
+  html_document:
+    df_print: paged
+header-includes:
+- \usepackage{multirow}
+- \usepackage{ragged2e}
+- \usepackage{booktabs}
+---
+
+# Exercício 1
+
+Considere a seguinte matriz de correlação
+
+$$\rho = \begin{pmatrix} 
+1,000 & -0,488 & 0,150 \\ 
+-0,488 & 1,000 & -0,130 \\ 
+0,150 & -0,130 & 1,000 
+\end{pmatrix}$$
+
+de três variáveis padronizadas $Z_1$, $Z_2$ e $Z_3$.
+
+(a) Mostre que $\rho$ pode ser decomposta segundo um modelo fatorial com $m=1$ fator dado por 
+$$Z_1=0,75F_1+\epsilon_1,$$
+$$Z_2=-0,65F_1+\epsilon_2,$$
+e
+$$Z_3=0,20F_1+\epsilon_3$$
+
+com $Var(F_1)=1$ e $Cov(\epsilon_j,F_1)=0$, $j=1,2,3$. Obtenha a matriz $\Psi$ com as variâncias específicas.
+
+## Resolução
+
+Como sabemos que a matrix $\rho$ pode ser ser decomposta em $\rho=LL^T + \Psi$ onde $L=\begin{pmatrix} 0.75 \\ -0.65 \\ 0.20 \end {pmatrix}$, assim $\Psi = \rho - LL^T$ então:
+$$\Psi= \begin{pmatrix} 
+1,000 & -0,488 & 0,150 \\ 
+-0,488 & 1,000 & -0,130 \\ 
+0,150 & -0,130 & 1,000 
+\end{pmatrix} - \begin{pmatrix} 0.75 \\ -0.65 \\ 0.20 \end {pmatrix} \begin{pmatrix} 0.75 & -0.65 & 0.20 \end {pmatrix}= $$
+$$\begin{pmatrix} 
+1,000 & -0,488 & 0,150 \\ 
+-0,488 & 1,000 & -0,130 \\ 
+0,150 & -0,130 & 1,000 
+\end{pmatrix} - \begin{pmatrix} 
+0,562 & 0,488 & 0,150 \\ 
+0,488 & 0,423 & 0,130 \\ 
+0,150 & 0,130 & 0,040 
+\end{pmatrix} \Rightarrow \Psi= \begin{pmatrix} 
+0,438 & 0 & 0 \\ 
+0 & 0,577 & 0 \\ 
+0 & 0 & 0,960 
+\end{pmatrix}$$
+
+(b) Obtenha as comunalidades e interprete-as.
+
+## Resolução
+
+Comulalidade de $Z_1: C^2_1=0.75^2=0.562$
+
+Comulalidade de $Z_2: C^2_2=(-0.65)^2=0.422$
+
+Comulalidade de $Z_3: C^2_3=0.2^2=0.04$
+
+Onde cada comulalidade representa a proporção de variabilidade da variável $Z_j \ (j=1,2,3)$ explicada pelo fator. Logo o fator explica, principalmente, a variabilidade das duas primeiras variáveis.
+
+\newpage
+(c) Calcule a correlação entre $Z_j$ e $F_1$ , $j=1,2,3$. Discuta.
+
+## Resolução
+
+Sabe-se que $corr(Z_j,F_1)=l_{1j}$, j=1,2,3, logo: 
+
+$Corr(Z_1,F_1)=0.75$
+
+$Corr(Z_2,F_1)=-0.65$
+
+$Corr(Z_3,F_1)=0.20$
+
+Utilizando o resultado do item (b), o fator explica principalmente $Z_1$ e $Z_2$, nota-se então que as correlações dessas variáveis com o fator possuem sinais opostos, logo conclui-se que o fator explica a proporcionalidade inversa dessas variáveis.
+
+# Exercício 2
+
+Considere ainda a matriz de correlação do exercı́cio anterior.
+
+(a) Obtenha os autovalores e autovetores correspondentes.
+
+## Resolução
+
+```{r echo=FALSE}
+r <- matrix(c(1,-0.488,0.15,-0.488,1,-0.13,0.15,-0.13,1),3,3)
+
+auto_v <- eigen(r)
+
+knitr::kable(caption="Autovalores", round(t(auto_v$values),3),col.names = c( "$\\lambda_1$","$\\lambda_2$","$\\lambda_3$"))
+knitr::kable(caption="Autovetores", round(auto_v$vectors,3),col.names = c("$e_1$","$e_2$","$e_3$"))
+```
+
+(b) Considerando um modelo fatorial com $m=1$ fator, obtenha a matriz de cargas fatoriais **L** e a matriz de variâncias específicas $\Psi$ usando o método das componentes principais. Compare com os resultados do exercı́cio anterior.
+
+## Resolução
+
+Considerando um modelo fatorial com $m=1$ fator, a matriz de cargas fatoriais **L** pode ser obtida pelo método de componentes principais $\hat{L}=\sqrt{\lambda_1}*e_1$, em que $\lambda_1$ é o primeiro autovalor e $e_1$ é o primeiro autovetor, assim $$\hat{L}=\sqrt(1.558) \begin {pmatrix} 0.670 \\ -0.663 \\ 0.334 \end {pmatrix} \Rightarrow \hat{L}=\begin {pmatrix} 0.836 \\ -0.827 \\ 0.417 \end {pmatrix}$$
+
+Além disso a matriz de variâncias específicas $\Psi$ pode ser estimada por:
+
+Como sabemos que a matrix $\rho$ pode ser ser decomposta em $\rho=\hat{L}\hat{L^T} + \hat{\Psi}$ onde $\hat{L}=\begin{pmatrix} 0.836 \\ -0.827 \\ 0.417 \end {pmatrix}$, assim $\hat{\Psi} = \rho - \hat{L}\hat{L^T}$ então:
+$$\hat{\Psi}= \begin{pmatrix} 
+0.20 & 0 & 0 \\ 
+0 & 0.09 & 0 \\ 
+0 & 0 & 0.07 
+\end{pmatrix}$$
+
+Onde podemos notar que os valores de $\hat L$ são maiores que o L dado no exercício anterior, o que resulta em uma maior variabilidade explicada pelo fator e uma correlação mais forte entre as variáveis e o fator. E pela matriz de variâncias específicas $\hat \Psi$ possui valores menores que a matriz $\Psi$ dada no exercício anterior, representando que a variância não explicada pelo fator diminuiu.
+
+(c) Obtenha a proporção da variabilidade total dos dados explicada pelo fator.
+
+## Resolução
+
+A proporção da variabilidade total dos dados explicada pelo fator 1 é: $\frac{\lambda_1}{p}=\frac{1.558}{3}=0.52=52 \%$ 
+
+Em que $\lambda_1$ é o primeiro autovalor e $p$ é o número de variáveis originais no caso são 3.
+
+# Exercício 3
+
+As cargas fatoriais associadas a 6 variáveis padronizadas e as cargas fatoriais rotacionadas (varimax) estão apresentadas a seguir:
+
+\center
+\begin{tabular}{c|cc|cc}
+\hline
+ & \multicolumn{2}{c|}{Fatores} & \multicolumn{2}{c}{Fatores Rotac.} \\
+Variáveis & $F_1$ & $F_2$ & $F_1$ & $F_2$ \\ \hline
+$Y_1$ & 0.602 & 0.2 & 0.484 & 0.411 \\
+$Y_2$ & 0.467 & 0.154 & 0.375 & 0.319 \\
+$Y_3$ & 0.926 & 0.143 & 0.603 & 0.717 \\
+$Y_4$ & 1 & 0 & 0.519 & 0.855 \\
+$Y_5$ & 0.874 & 0.476 & 0.861 & 0.499 \\
+$Y_6$ & 0.894 & 0.327 & 0.744 & 0.594 \\ \hline
+\end{tabular}
+\justify
+
+(a) Obtenha as comunalidades e as variâncias específicas para as cargas fatoriais sem e com rotação.
+
+## Resolução
+
+Considerando primeiramente as cargas fatoriais sem a rotação temos:
+
+Comulalidade de $Y_1: C^2_1=0.602^2+0.2^2=0.403$
+
+Comulalidade de $Y_2: C^2_2=0.467^2+0.154^2=0.242$
+
+Comulalidade de $Y_3: C^2_3=0.926^2+0.143^2=0.878$
+
+Comulalidade de $Y_4: C^2_4=1^2+0^2=1$
+
+Comulalidade de $Y_5: C^2_5=0.874^2+0.476^2=0.99$
+
+Comulalidade de $Y_6: C^2_6=0.894^2+0.327^2=0.906$
+
+Agora as variâncias especifícas, por se tratar de variáveis padronizadas, temos:
+
+$\Psi_1 = 1-C^2_1 = 1- 0.403 = 0.597$
+
+$\Psi_2 = 1-C^2_2 = 1- 0.242 = 0.758$
+
+$\Psi_3 = 1-C^2_3 = 1- 0.878 = 0.122$
+
+$\Psi_4 = 1-C^2_4 = 1- 1 = 0$
+
+$\Psi_5 = 1-C^2_5 = 1- 0.99 = 0.01$
+
+$\Psi_6 = 1-C^2_6 = 1- 0.906 = 0.094$
+
+Agora com as cargas fatoriais com a rotação temos:
+
+Comulalidade de $Y_1: C^2_1=0.484^2+0.411^2=0.403$
+
+Comulalidade de $Y_2: C^2_2=0.375^2+0.319^2=0.242$
+
+Comulalidade de $Y_3: C^2_3=0.603^2+0.717^2=0.878$
+
+Comulalidade de $Y_4: C^2_4=0.519^2+0.855^2=1$
+
+Comulalidade de $Y_5: C^2_5=0.861^2+0.499^2=0.99$
+
+Comulalidade de $Y_6: C^2_6=0.744^2+0.594^2=0.906$
+
+Agora as variâncias especifícas, analogamente ao caso sem rotação, temos:
+
+$\Psi_1 = 1-C^2_1 = 1- 0.403 = 0.597$
+
+$\Psi_2 = 1-C^2_2 = 1- 0.242 = 0.758$
+
+$\Psi_3 = 1-C^2_3 = 1- 0.878 = 0.122$
+
+$\Psi_4 = 1-C^2_4 = 1- 1 = 0$
+
+$\Psi_5 = 1-C^2_5 = 1- 0.99 = 0.01$
+
+$\Psi_6 = 1-C^2_6 = 1- 0.906 = 0.094$
+
+Nota-se que as comunalidades e as variâncias específicas são iguais para as cargas fatoriais sem e com rotação.
+
+(b) Qual é proporção da variância total dos dados explicada por cada fator?
+
+## Resolução
+
+A proporção de variância total por cada fator (caso não rotacionado) é dado pela tabela abaixo:
+
+\center
+\begin{tabular}{c|cc}
+Variável & $l^2_{i1}$ & $l^2_{i2}$ \\ \hline
+$Y_1$ & 0.36 & 0.04 \\
+$Y_2$ & 0.22 & 0.02 \\
+$Y_3$ & 0.86 & 0.02 \\
+$Y_4$ & 1 & 0 \\
+$Y_5$ & 0.76 & 0.23 \\
+$Y_6$ & 0.80 & 0.11 \\ \hline
+$Y_j$ & 4 & 0.42 \\
+\% & 40 & 4.2
+\end{tabular}
+\justify
+
+A proporção de variância explicada por cada fator (caso rotacionado) é dado pela tabela abaixo:
+
+\center
+\begin{tabular}{c|cc}
+Variável & $l^2_{i1}$ & $l^2_{i2}$ \\ \hline
+$Y_1$ & 0.23 & 0.17 \\
+$Y_2$ & 0.14 & 0.1 \\
+$Y_3$ & 0.36 & 0.51 \\
+$Y_4$ & 0.27 & 0.73 \\
+$Y_5$ & 0.74 & 0.25 \\
+$Y_6$ & 0.55 & 0.35 \\ \hline
+$Y_j$ & 2.29 & 2.11 \\
+\% & 22.9 & 21.1
+\end{tabular}
+\justify
+
+Nota-se que com a rotação a proporção da variância total dos dados explicada por cada fator é maior que sem a rotação.
+
+(c) Para uma observação com valores observados das variáveis originais (já padronizados) iguais a (0.8, -0.2, 1.3, -0.6, 1.5, -0.7), obtenha os escores fatoriais utilizando os fatores rotacionados.
+
+## Resolução
+
+Os escores fatoriais utilizando os fatores rotacionados são:
+
+$\hat F_1 = 0.8*0.484+(-0.2)*0.375+1.3*0.603+(-0.6)*0.519+1.5*0.861+(-0.7)*0.744= 1.5554$
+$\hat F_2 = 0.8*0.411+(-0.2)*0.319+1.3*0.717+(-0.6)*0.855+1.5*0.499+(-0.7)*0.594= 1.0168$
+
+# Exercício 4
+
+Os dados no arquivo **T1-9.dat** são referentes a recordes nacionais femininos de corrida para diversos paı́ses. As colunas são referentes aos tempos recordes nas seguintes modalidades, res- pectivamente:
+
+- 100 m (segundos);
+
+- 200 m (segundos);
+
+- 400 m (segundos);
+
+- 800 m (minutos);
+
+- 1500 m (minutos);
+
+- 5000 m (minutos);
+
+- 10.000 m (minutos); 
+
+- Maratona (minutos).
+
+(a) Faça uma análise fatorial com a matriz de covariância dos dados.
+
+## Resolução
+
+Fazendo a análise fatorial com a matriz de covariância dos dados, pelo método das componentes principais e sem rotação, temos: 
+
+```{r echo=FALSE, out.width='70%',fig.align='center'}
+dados <- read.table("T1-9.dat")
+names(dados) <- c("Pais","100m","200m","400m","800m","1500m","3000m","Maratona")
+
+Cov <- round(cov(dados[2:8]),3) 
+
+knitr::kable(caption="Matriz de Covariâncias", Cov)
+
+screeplot(princomp(dados[-1], cor=F),
+          type="lines",
+          pch=16,
+          col="turquoise4",
+          main=" Scree Plot")
+abline(h=1,lty=3)
+```
+
+Segundo o critério de Kaiser que considera que o número de fatores tem autovalores maiores que 1, assim observando o Scree plot acima, dois Fatores é suficiente para explicar a maior parte da variavilidade dos dados.
+
+```{r echo=FALSE,warning=F}
+library(psych)
+Fat <- principal(Cov, nfactors=2, rotate="none",covar = T)
+Fat
+```
+
+Onde podemos notar que pela variabilidade total dos dados, o primeiro fator representa uma variabilidade de 274.36 enquanto o segundo fator, apenas 4.02.
+
+Sendo as comunalidades dadas por:
+```{r echo=FALSE}
+knitr::kable(caption = "Comunalidades",round(t(Fat$communality),3))
+```
+
+Onde cada comulalidade representa a proporção de variabilidade de $X_j \ (j=1,...,7)$ explicada pelos fatores, em que a variável Maratona se destaca, obtendo uma grande parcela da variância explicada pelos fatores.
+
+E as variâncias específicas:
+```{r echo=FALSE}
+knitr::kable(caption = "Variâncias especifícas",round(t(Fat$uniquenesses),3))
+```
+
+Onde cada variância específica representa a parcela da variância não explicada pelos fatores, tendo destaque para a Maratona que teve toda a sua variância explicada.
+
+(b) Faça uma análise fatorial com a matriz de correlação dos dados.
+
+## Resolução
+
+Fazendo a análise fatorial com a matriz de correlação dos dados, pelo método das componentes principais e sem rotação, temos: 
+
+```{r echo=FALSE, out.width='70%',fig.align='center'}
+Cor <- round(cor(dados[2:8]),3)
+
+knitr::kable(caption="Matriz de Correlações", Cor)
+
+screeplot(princomp(dados[-1], cor=T),
+          type="lines",
+          pch=16,
+          col="turquoise4",
+          main=" Scree Plot")
+abline(h=1,lty=3)
+```
+
+Segundo o critério de Kaiser que considera que o número de fatores tem autovalores maiores que 1, assim observando o Scree plot acima, um fator é suficiente para explicar a maior parte da variavilidade dos dados.
+
+```{r echo=FALSE}
+Fat2 <- principal(Cor, nfactors=1, rotate="none")
+Fat2
+```
+
+Onde podemos notar que pela variabilidade total dos dados, o fator representa uma variabilidade de 5.81.
+
+Sendo as comunalidades dadas por:
+```{r echo=FALSE}
+knitr::kable(caption = "Comunalidades",round(t(Fat2$communality),3))
+```
+
+Onde cada comulalidade representa a proporção de variabilidade de $X_j \ (j=1,...,7)$ explicada pelos fatores, em que todas as variáveis possuem proporção entre 0.7 e 1.
+
+E as variâncias específicas:
+```{r echo=FALSE}
+knitr::kable(caption = "Variâncias especifícas",round(t(Fat2$uniquenesses),3))
+```
+
+Onde cada variância específica representa a parcela da variância não explicada pelos fatores, em que todas as variáveis possuem valores entre 0 e 0.3.
+
+# Exercício 5
+
+Ainda com os dados do arquivo **T1-9.dat**, transforme os tempos recordes em velocidades (na unidade metros por segundo). A maratona corresponde a um percurso de 42.195 metros (ou 26,2 milhas). Faça análise fatorial com a matriz de covariância dos dados e com a matriz de correlação. Discuta os resultados.
+
+\newpage
+
+## Resolução
+
+Fazendo a transformação dos tempos recordes em velocidades (m/s) então a análise fatorial com a matriz de covariâncias dos dados transformados pelo método das componentes principais e sem rotação, temos:
+
+```{r echo=FALSE, out.width="70%",fig.align="center"}
+dados.m <- dados
+
+# conversão dos dados para velocidades em (m/s)
+dados.m$`100m` <- round(100/dados.m$`100m`,2)
+dados.m$`200m` <- round(200/dados.m$`200m`,2)
+dados.m$`400m` <- round(400/dados.m$`400m`,2)
+dados.m$`800m` <- round(800/(dados.m$`800m`/60),2)
+dados.m$`1500m` <- round((1500/(dados.m$`1500m`/60)),2)
+dados.m$`3000m` <- round((3000/(dados.m$`3000m`/60)),2)
+dados.m$Maratona <- round((42.195/(dados.m$Maratona/60)),2)
+
+Cov <- round(cov(dados.m[2:8]),3) 
+
+knitr::kable(caption="Matriz de Covariâncias", Cov)
+
+screeplot(princomp(dados.m[-1], cor=F),
+          type="lines",
+          pch=16,
+          col="turquoise4",
+          main=" Scree Plot")
+abline(h=1,lty=3)
+```
+
+Segundo o critério de Kaiser que considera que o número de fatores tem autovalores maiores que 1, assim observando o Scree plot acima, três fatores é suficiente para explicar a maior parte da variavilidade dos dados.
+
+```{r echo=FALSE,warning=F,message=F}
+require(psych)
+Fat <- principal(Cov, nfactors=3, rotate="none",covar = T)
+Fat
+```
+
+Onde podemos notar que com os 3 fatores a variabilidade total proporcional é de 100%.
+
+Sendo as comunalidades dadas por:
+```{r echo=FALSE}
+knitr::kable(caption = "Comunalidades",round(t(Fat$communality),3))
+```
+
+Onde cada comulalidade representa a proporção de variabilidade de $X_j \ (j=1,...,7)$ explicada pelos fatores, em que as variáveis de 800m, 1500m e 3000m possuem valores muito maiores que os demais.
+
+E as variâncias específicas:
+```{r echo=FALSE}
+knitr::kable(caption = "Variâncias especifícas",round(t(Fat$uniquenesses),4))
+```
+
+Onde cada variância específica representa a parcela da variância não explicada pelos fatores, em que todas as variáveis possuem valores entre menores que 0.5, então a variabilidade foi quase toda explicada pelos fatores.
+\newpage
+Fazendo o mesmo com a matriz de correlações, temos:
+
+```{r echo=FALSE, out.width="70%",fig.align="center"}
+Cor <- round(cor(dados.m[2:8]),3) 
+
+knitr::kable(caption="Matriz de Correlações", Cor)
+
+screeplot(princomp(dados.m[-1], cor=T),
+          type="lines",
+          pch=16,
+          col="turquoise4",
+          main=" Scree Plot")
+abline(h=1,lty=3)
+```
+
+Segundo o critério de Kaiser que considera que o número de fatores tem autovalores maiores que 1, assim observando o Scree plot acima, um fator é suficiente para explicar a maior parte da variavilidade dos dados.
+
+```{r echo=FALSE}
+Fat2 <- principal(Cor, nfactors=1, rotate="none")
+Fat2
+```
+
+Onde podemos notar que o fator possui uma proporção de variabilidade total de 0.83.
+
+Sendo as comunalidades dadas por:
+```{r echo=FALSE}
+knitr::kable(caption = "Comunalidades",round(t(Fat2$communality),3))
+```
+
+Onde cada comulalidade representa a proporção de variabilidade de $X_j \ (j=1,...,7)$ explicada pelos fatores, em que os valores estão contidos no intervalo de 0.7 e 0.9.
+
+E as variâncias específicas:
+```{r echo=FALSE}
+knitr::kable(caption = "Variâncias especifícas",round(t(Fat2$uniquenesses),3))
+```
+
+Onde cada variância específica representa a parcela da variância não explicada pelos fatores, onde os valores estão entre 0.1 e 0.3.
+
+# Exercício 6
+
+Os vetores $X^{(1)}$ e $X^{(2)}$ apresentam os seguintes vetores de média e matriz de covariância:
+
+\center
+\includegraphics[width=450pt]{/home/gui/sdq.png}
+\justify
+\newpage
+(a) Calcule as correlações canônicas.
+
+## Resolução
+
+As correlações canônicas em valor absoluto são:
+
+```{r echo=FALSE, message=FALSE}
+library(expm)
+Cov <- matrix(c(8,2,3,1,
+                2,5,-1,3,
+                3,-1,6,-2,
+                1,3,-2,7),4,4)
+
+r11 <- Cov[1:2,1:2]
+r12 <- Cov[1:2,-(1:2)]
+r21 <- Cov[-(1:2),1:2]
+r22 <- Cov[3:4,3:4]
+
+E1 <- sqrtm(solve(r11))%*%r12%*%solve(r22)%*%r21%*%sqrtm(solve(r11))
+E2 <- sqrtm(solve(r22))%*%r21%*%solve(r11)%*%r12%*%sqrtm(solve(r22))
+
+VVM <- eigen(E1)$vectors
+VVN <- eigen(E2)$vectors
+
+# Coeficientes de U
+A <- sqrtm(solve(r11))%*%VVM
+
+# Coeficientes de V
+B <- sqrtm(solve(r22))%*%VVN
+
+knitr::kable(caption = "Correlações canônicas",round(t(sqrt(eigen(E1)$values)),3))
+```
+
+Em que 0.552 é a correlação canônica entre $U_1$ e $V_1$ e 0.49 é a correlação canônica entre $U_2$ e $V_2$.
+
+(b) Obtenha os pares de variáveis canônicas $(U_1,V_1)$ e $(U_2,V_2)$.
+
+## Resolução
+
+Os pares de variáveis canônicas $(U_1,V_1)$ e $(U_2,V_2)$ são:
+
+$U_1= 0.32 X_{11} - 0.36 X_{12}$
+
+$U_2= 0.19 X_{11} + 0.3 X_{12}$
+
+E
+
+$V_1= 0.36 X_{21} - 0.09 X_{22}$
+
+$V_2= 0.23 X_{21} + 0.38 X_{22}$
+
+(c) Obtenha os autovalores de $\Sigma^{-1}_{11}\Sigma_{12}\Sigma^{-1}_{22}\Sigma_{21}$ e compare com os autovalores de $\Sigma^{-1/2}_{11}\Sigma_{12}\Sigma^{-1}_{22}\Sigma^{-1/2}_{21}$.
+
+## Resolução
+
+Para a matriz $\Sigma^{-1}_{11}\Sigma_{12}\Sigma^{-1}_{22}\Sigma_{21}$ obtemos os seguintes autovalores:
+
+```{r echo=FALSE}
+M <- solve(r11)%*%r12%*%solve(r22)%*%r21
+knitr::kable(caption="Autovalores", round(t(eigen(M)$values),3),col.names = c( "$\\lambda_1$","$\\lambda_2$"))
+```
+
+Para a matriz $\Sigma^{-1/2}_{11}\Sigma_{12}\Sigma^{-1}_{22}\Sigma^{-1/2}_{21}$ obtemos os seguintes autovalores:
+
+```{r echo=FALSE}
+M.sqrt <- sqrtm(solve(r11))%*%r12%*%solve(r22)%*%r21%*%sqrtm(solve(r11))
+knitr::kable(caption="Autovalores", round(t(eigen(M.sqrt)$values),3),col.names = c( "$\\lambda_1$","$\\lambda_2$"))
+
+```
+
+Em que podemos notar que os autovalores são identicos para as duas expressões.
+
+
+# Exercício 7
+
+Quatro diferentes testes foram aplicados em $n=140$ crianças da sétima série nos Estados Unidos. Os testes aplicados foram:
+
+- Leitura:
+
+  -- $X_1^{(1)}$: Velocidade
+  
+  -- $X_2^{(1)}$: Capacidade de interpretação
+
+- Matemática:
+
+  -- $X_1^{(2)}$: Velocidade
+  
+  -- $X_2^{(2)}$: Capacidade ou habilidade
+  
+A seguinte matriz de correlação foi obtida com os dados:
+
+\center
+\includegraphics[width=250pt]{/home/gui/r.png}
+\justify
+
+(a) Determine as correlações canônicas amostrais.
+
+## Resolução
+
+As correlações canônicas em valor absoluto são:
+
+```{r echo=FALSE}
+Cor <- matrix(c(1,0.6328,0.2412,0.0586,
+                0.6328,1,-0.0553,0.0655,
+                0.2412,-0.0553,1,0.4248,
+                0.0586,0.0655,0.4248,1),4,4)
+
+r11 <- Cor[1:2,1:2]
+r12 <- Cor[1:2,-(1:2)]
+r21 <- Cor[-(1:2),1:2]
+r22 <- Cor[3:4,3:4]
+
+E1 <- sqrtm(solve(r11))%*%r12%*%solve(r22)%*%r21%*%sqrtm(solve(r11))
+E2 <- sqrtm(solve(r22))%*%r21%*%solve(r11)%*%r12%*%sqrtm(solve(r22))
+
+VVM <- eigen(E1)$vectors
+VVN <- eigen(E2)$vectors
+
+knitr::kable(caption = "Correlações canônicas",round(t(sqrt(eigen(E1)$values)),3))
+```
+
+(b) Teste a hipótese $H_0:\Sigma_{12}=0$ com nı́vel de significância de 5%. Se a hipótese nula for rejeitada, teste a hipótese da primeira correlação canônica apenas ser igual a zero.
+
+## Resolução
+
+Testando a hipótese $H_0:\Sigma_{12}=0$ utlizando a estatística de razão de verossimilhança, temos que: $$-2ln\Lambda=nln(\frac{|S_{11}||S_{22}|}{|S|})$$
+
+Em que $S_{11}$ e $S_{22}$ são as submatrizes que estimam as submatrizes populacionais $\Sigma_{11}$ e $\Sigma_{22}$ respectivamente e $S$ é a matriz que estima a matriz $\Sigma$, assim:
+
+$|S_{11}|=0.599$ , $|S_{22}|= 0.819$ e $|S|=0.413$
+
+Obtendo a seguinte estatística de teste:
+
+```{r echo=FALSE}
+p <- dim(r11)[1]
+q <- dim(r22)[1]
+s_11 <- det(r11)
+s_22 <- det(r22)
+S <- det(Cor)
+lb <- 140*log((s_11*s_22)/S)
+lb
+```
+
+Como visto em aula, a estatística $-2ln\Lambda \sim \chi^2_{p*q}$ quando $n \rightarrow  \infty$ e como temos p e q varíaveis iguais a 2 temos o seguinte *p-value* do teste:
+
+```{r echo=FALSE}
+1-pchisq(lb,p*q)
+```
+Assim, com un nível de significância de 5% temos evidências estatísticas para rejeitar $H_0$.
+
+Como o teste acima rejeitou $H_0$, iremos testar se apenas a primeira correlação é igual a zero:
+$$ \left\{ \begin{array}{ll}
+H_0: \rho_1 = 0 \\
+H_1: \rho_1 \ne 0 \end{array} \right.\ $$
+
+Para testar a hipótese utilizaremos a estatística de teste:
+
+$$
+t_{teste} = \frac{r}{\sqrt{\frac{1-r^2}{n-2}}}
+$$
+
+que possui distribuição assintótica t student com n-2 graus de liberdade.
+
+logo,
+
+$$
+t_{teste} = \frac{0.395}{\sqrt{\frac{1-0.395^2}{140-2}}}=  5.0509
+$$
+
+Como $n=140$, é possível aproximar para a normal, deste modo o p-valor é de:
+
+```{r, echo=F}
+r1 <- sqrt(eigen(E1)$values)[1] # primeira correlação
+gl <- 2 # graus de liberdade
+n <- 140 # tamanho da amostra
+
+t.test <- r1/sqrt((1-r1^2)/(n-gl)) # estatística do teste 
+
+2*(1-pnorm(t.test)) # p-value bilateral
+```
+
+Desse modo, rejeita-se $H_0$, logo a primeira correlação canônica não é igual a 0 a um nível de significância de 5%.
+
+(c) Obtenha as variávies canônicas (utilizando-se os dados padronizados).
+
+## Resolução
+
+Os pares de variáveis canônicas $(U_1,V_1)$ e $(U_2,V_2)$ são:
+
+$U_1= 1.26 Z_{11} - 1.03 Z_{12}$
+
+$U_2= 0.29 Z_{11} + 0.78 Z_{12}$
+
+E
+
+$V_1= -1.10 Z_{21} + 0.45 Z_{22}$
+
+$V_2= 0.02 Z_{21} - 1.01 Z_{22}$
+\newpage
+(d) Obtenha um tabela com as correlações entre as variáveis canônicas e as variáveis originais.
+
+## Resolução
+
+$$
+cor(U,X^{(1)}_1) = AR_{11}
+$$
+$$
+cor(U,X^{(1)}_2) = AR_{12} 
+$$
+$$
+cor(V,X^{(2)}_1) = BR_{21} 
+$$
+$$
+cor(V,X^{(2)}_2) = BR_{22}
+$$
+
+resolvendo, respectivamente:
+
+```{r echo=FALSE}
+corU1 <- A%*%r11
+corU2 <- A%*%r12
+corV1 <- B%*%r21
+corV2 <- B%*%r22
+corU1
+corU2
+corV1
+corV2
+```
+
+(e) Interprete as variáveis canônicas.
+
+## Resolução
+
+$U_1$ representa a oposição entre a velocidade de leitura e a capacitação de interpretação, $U_2$ se refere a associação entre a velocidade de leitura e a capacitação de interpretação. $V_1$ explica a velocidade em matemática em oposição à sua capacidade ou habilidade. E por último, $V_2$ diz sobre a capacidade ou habilidade matemática.
+
+# Exercício 8
+
+Os dados disponíveis no arquivo **T7-7.dat** são referentes a propriedades de polpa (ou pasta) de celulose utilizada para fabricação do papel e também algumas propriedades do papel produzido com a polpa. Os dados são de 62 observações e as variáveis observadas são:
+
+- Propriedades do papel:
+
+  -- $X_1^{(1)}$: BL (*breaking length*);
+  
+  -- $X_2^{(1)}$: EM (*elastic modulus*);
+  
+  -- $X_3^{(1)}$: SF (*stress ar failure*);
+
+  -- $X_4^{(1)}$: BS (*burst strength*).
+  
+- Propriedades da polpa de celulose:
+
+  -- $X_1^{(2)}$: AFL (*arithmetic fiber length*);
+  
+  -- $X_2^{(2)}$: LFF (*long fiber fraction*);
+  
+  -- $X_3^{(2)}$: FFF (*fine fiber fraction*);
+
+  -- $X_4^{(2)}$: ZST (*zero span tensile*).
+\newline
+
+Obtenha os pares de variáveis canônicas e as correlações canônicas. O primeiro par de variáveis canônicas é uma boa medida sumária das variáveis que representam? Justifique a resposta. Teste a significância das correlações canônicas e interprete os pares de variáveis canônicas com correlações significativas com nível de significância igual a 5%.
+
+## Resolução
+
+Os pares de de variáveis canônicas são:
+
+\center
+\begin{tabular}{c|ccc|c}
+\cline{1-2} \cline{4-5}
+$U_1$ & $V_1$ &  & $U_2$ & $V_2$ \\ \cline{1-2} \cline{4-5} 
+1.505*BL & 0.159*AFL &  & -3.496*BL & 0.689*AFL \\
+0.212*EM & -0.632*LFF &  & -1.543*EM & 1.003*LFF \\
+-1.998*SF & -0.325*FFF &  & 1.076*SF & 0.005*FFF \\
+-0.676*BS & -0.818*ZST &  & 3.768*BS & -1.562*ZST \\ \cline{1-2} \cline{4-5} 
+\end{tabular}
+\justify
+
+E as correlações canônicas são:
+
+```{r echo=FALSE, message=FALSE}
+library(CCA)
+library(knitr)
+
+dados <- read.table("T7-7.dat")
+names(dados) <- c("BL","EM","SF","BS","AFL","LFF","FFF","ZST")
+
+corcan <- cc(scale(dados[,1:4]),scale(dados[,5:8]))
+
+kable(caption = "Correlações Canônicas",round(t(corcan$cor),3))
+```
+
+Podemos notar que $U_1$ e $U_2$ explicam a diferença entre as propriedades BL e EM do papel e as propriedades SF e BS do papel. $V_1$ por sua vez, explica a diferença entre a propriedade AFL e as demais propriedades da polpa de celulose. Por fim, $V_2$ explica a diferença entre a variável ZST e as demais propriedades da polpa de celulose. Nota-se também que a correlação entre $U_1$ e $V_1$ é alta (0.917), assim como a correlação entre $U_2$ e $V_2$ (0.817).
+
+Fazendo o teste de significância das correlações canônicas, temos:
+
+```{r echo=FALSE,message=FALSE}
+library(candisc)
+cancor(scale(dados[,1:4]),scale(dados[,5:8]))
+```
+
+E com o teste acima pode se notar que os dois primeiros pares de variáveis canônicas são significantes para a análise.
